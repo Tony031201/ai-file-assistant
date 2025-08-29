@@ -82,6 +82,43 @@ class DBTools:
         self.cur.execute("PRAGMA journal_mode=WAL")
         self.cur.execute("PRAGMA synchronous=NORMAL")
 
+        self._ensure_schema()
+
+    def _ensure_schema(self):
+        self.cur.executescript("""
+        PRAGMA foreign_keys=ON;
+
+        CREATE TABLE IF NOT EXISTS files (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          path       TEXT UNIQUE NOT NULL,        -- 绝对路径（已规范化）
+          name       TEXT NOT NULL,               -- 文件名
+          case_key   TEXT NOT NULL,               -- 文件名小写（或规则化）用于不区分大小写检索
+          ext        TEXT,                        -- 扩展名（含点，如 .pdf）
+          size       INTEGER,                     -- 字节
+          mtime      INTEGER,                     -- 修改时间戳（秒）
+          ctime      INTEGER,                     -- 创建时间戳（秒）
+          deleted    INTEGER DEFAULT 0,           -- 软删除标记：0=在库，1=已删除（如你要表示“是否目录”，建议改列名为 is_dir）
+          is_dir     INTEGER DEFAULT 0,           -- 是否为目录：0=文件，1=目录（如不需要可删）
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now')), -- 最近变更时间戳（秒）
+          note       TEXT                         -- 备注/标签
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_files_case_key ON files(case_key);
+        CREATE INDEX IF NOT EXISTS idx_files_ext      ON files(ext);
+        CREATE INDEX IF NOT EXISTS idx_files_mtime    ON files(mtime);
+        CREATE INDEX IF NOT EXISTS idx_files_deleted  ON files(deleted);
+
+        -- 自动维护 updated_at
+        CREATE TRIGGER IF NOT EXISTS trg_files_updated_at
+        AFTER UPDATE ON files
+        FOR EACH ROW
+        WHEN NEW.updated_at = OLD.updated_at
+        BEGIN
+          UPDATE files SET updated_at = strftime('%s','now') WHERE id = NEW.id;
+        END;
+        """)
+        self.conn.commit()
+
     def close(self):
         try:
             self.cur.close()
