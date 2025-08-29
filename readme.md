@@ -11,24 +11,6 @@
 
 主程序入口为 main.py。
 
-数据库初始化
-------------------------------------------------------------
-本项目使用 SQLite 数据库 assistant.db 储存文件索引。
-
-首次运行前，请在 data/ 文件夹下创建一个空的数据库文件：
-
-Linux / macOS:
-    cd data
-    sqlite3 assistant.db ""
-
-Windows (PowerShell):
-    cd data
-    echo. > assistant.db
-
-或者手动在 data/ 下新建一个名为 assistant.db 的空文件。
-
-随后，运行主程序:
-    python assistant/main.py
 
 ------------------------------------------------------------
 运行环境
