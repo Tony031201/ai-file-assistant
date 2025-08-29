@@ -1,0 +1,30 @@
+# 忽略 Python venv 与依赖
+venv/
+.venv/
+env/
+**/Lib/**
+**/site-packages/**
+
+# Node / 前端
+node_modules/
+.pnpm-store/
+.yarn/
+.parcel-cache/
+
+# 构建与缓存
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+
+# 临时/下载
+*.tmp
+*.part
+*.crdownload
+
+# 如果你想追踪某个特定子目录，即便它在默认忽略里：
+!src/
+!data/raw/**

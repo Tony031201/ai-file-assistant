@@ -1,0 +1,58 @@
+BASE_QSS = """
+* { selection-background-color: #5b9bff; selection-color: #ffffff; }
+QMainWindow { background: {bg}; }
+QToolBar { background: {panel}; border: none; padding: 6px; spacing: 8px; }
+QStatusBar {{ background: {panel}; color: {fg2}; }}
+
+#SideList {{
+  background: {panel};
+  border: 1px solid {border};
+  border-radius: 10px;
+  padding: 6px;
+}}
+#ChatArea {{
+  background: {surface};
+  border: 1px solid {border};
+  border-radius: 12px;
+  padding: 10px;
+  color: {fg};
+}}
+#InputBox {{
+  background: {surface};
+  border: 1px solid {border};
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: {fg};
+}}
+#PrimaryButton {{
+  background: {primary};
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  min-width: 96px;
+}}
+#PrimaryButton:hover {{ filter: brightness(1.05); }}
+#PrimaryButton:pressed {{ filter: brightness(0.95); }}
+QSplitter::handle {{
+  background: {border};
+  width: 6px;
+}}
+QScrollBar:vertical {{
+  background: transparent; width: 10px; margin: 0;
+}}
+QScrollBar::handle:vertical {{
+  background: {border}; border-radius: 5px; min-height: 30px;
+}}
+"""
+
+LIGHT_QSS = BASE_QSS.format(
+    bg="#f4f6fa", panel="#ffffff", surface="#ffffff",
+    border="#e8eaf0", primary="#3b82f6",
+    fg="#111827", fg2="#6b7280"
+)
+DARK_QSS = BASE_QSS.format(
+    bg="#0f172a", panel="#111827", surface="#0b1220",
+    border="#1f2937", primary="#60a5fa",
+    fg="#e5e7eb", fg2="#9ca3af"
+)
