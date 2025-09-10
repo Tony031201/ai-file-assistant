@@ -5,7 +5,7 @@ class ClaudClient:
     def __init__(self):
         self.client = Anthropic(api_key=get_api())
         self.model = "claude-3-5-haiku-20241022"
-        self.tokens = 512
+        self.tokens = 1024
 
     def send_message(self, messages):
         response = self.client.messages.create(

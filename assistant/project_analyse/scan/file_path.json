@@ -1,0 +1,8 @@
+{
+  "root": "C:/Users/atuon/CSC475",
+  "files": [
+    {"path": "A2/spec_plot.py", "lang": "python"},
+    {"path": "A3/edo_autotuner.py",  "lang": "python"},
+    {"path": "A3/mono_pitch_detection.py", "lang": "python"}
+  ]
+}
