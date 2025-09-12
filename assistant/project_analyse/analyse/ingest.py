@@ -5,7 +5,7 @@ import threading
 from pathlib import Path
 from typing import Dict,List,Tuple,Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from claude_sonnet_4 import ClaudClient
+from analyse.claude_sonnet_4 import ClaudClient
 
 # 最大线程为3
 DEFAULT_WORKERS = 3
@@ -53,19 +53,29 @@ def task(client:ClaudClient, abs_path: Path):
     # send_message 接受 str 或 Path 都行，这里传 Path
     return client.send_message(abs_path)
 
-with ThreadPoolExecutor(max_workers=DEFAULT_WORKERS) as pool:
-    futures = []
-    for idx, item in enumerate(files_list):
-        rel = item["path"]
-        abs_path = (root_dir / rel).resolve()
-        p = make_full_path(item)
+def run_ingest():
+    with ThreadPoolExecutor(max_workers=DEFAULT_WORKERS) as pool:
+        futures = []
+        for idx, item in enumerate(files_list):
+            rel = item["path"]
+            abs_path = (root_dir / rel).resolve()
+            p = make_full_path(item)
 
-        client = api_list[idx%len(api_list)]
-        futures.append(pool.submit(task, client, abs_path))
+            client = api_list[idx%len(api_list)]
+            futures.append(pool.submit(task, client, abs_path))
 
-    for f in as_completed(futures):
-        path, result = f.result()
-        with open(f"store/{path}.txt","w",encoding="utf-8") as e:
-            e.write(result)
+        for f in as_completed(futures):
+            path, result = f.result()
+            result = result.strip()
+            if result.startswith("```json"):
+                # 输出清洗
+                result = result.lstrip("`")
+                start = result.find("{")
+                end = result.rfind("}")
+                if start != -1 and end != -1:
+                    result = result[start:end+1]
+
+            with open(f"analyse/store/{path}.json","w",encoding="utf-8") as e:
+                e.write(result)
 
 

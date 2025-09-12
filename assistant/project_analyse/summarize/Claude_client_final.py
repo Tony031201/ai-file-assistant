@@ -1,35 +1,29 @@
-import sys
+import sys,json
 from pathlib import Path
 from anthropic import Anthropic
 
-class ClaudClient:
+class ClaudClient2:
     def __init__(self,API_KEY:str):
         self.client = Anthropic(api_key=API_KEY)
         self.model = "claude-sonnet-4-20250514"
         self.tokens = 2048
         try:
-            with open("./analyse/prompt.txt","r",encoding="utf-8") as f:
+            with open("./summarize/prompt.txt", "r", encoding="utf-8") as f:
                 prompt = f.read()
         except FileNotFoundError:
-            print("来自项目分析模块:prompt缺失")
+            print("来自项目分析模块:prompt2缺失")
             sys.exit(1)
         self.prompt = prompt
 
-    def send_message(self, file_path:Path):
-        try:
-            with open(file_path,"r",encoding="utf-8") as f:
-                data = f.read()
-        except FileNotFoundError:
-            print("来自文件分析模块:文件路径不存在")
-            sys.exit(1)
+    def send_message(self, data):
 
         response = self.client.messages.create(
             model=self.model,  # model 编号
             max_tokens=self.tokens,
             system=self.prompt,
             messages=[
-                {"role": "user", "content": data}
+                {"role": "user", "content": json.dumps(data, ensure_ascii=False)}
             ],
         )
 
-        return Path(file_path).resolve().name,response.content[0].text
+        return response.content[0].text
