@@ -9,7 +9,7 @@ HISTORY_RECORD = os.path.join(DATA_DIR, 'history_record.json')
 
 _CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 _DEFAULTS = {
-    "WATCH_PATH": r"C:\Users\atuon",  # 你的默认目录
+    "WATCH_PATH": r"C:\Users\default_user",  # 你的默认目录
     "API_KEY":""
 }
 _lock = threading.RLock()

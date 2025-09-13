@@ -13,6 +13,7 @@ from analyse.analyse import analyze
 from visualization.interface import visualization
 from generate.create_file import createFile
 from sql.tracker import start_watching,stop_watching, should_ignore,initialize
+from cmd.cmd_executor import executor
 from core.error_handler import error
 from sql.sync_rebuild import rebuild_files_table
 import data.meta_data as meta_data
@@ -226,6 +227,7 @@ class MainWindow(QMainWindow):
         ### 指令分流 ###
         sql_output = None
         analyze_output = None
+        cmd_output = None
         # 当指令是sql，意味着这条信息的目的是查询sql。并且有实际存在的sql语句
         if filter_reply["sql"] and filter_reply["instruction"].strip() == "sql":
             judge = SQL_Filter(filter_reply["sql"])
@@ -256,6 +258,19 @@ class MainWindow(QMainWindow):
                 self.chat_area.append("文件生成成功")
             else:
                 self.chat_area.append("文件生成失败，请查看目录是否存在，或者同名文件已经存在")
+        elif filter_reply["instruction"].strip() == "cmd":
+            # 当指令为cmd，意味着这条信息的目的是执行系统命令，需要调动命令执行模块
+            self.chat_area.append("调用命令执行模块")
+            if filter_reply.get("cmd_command"):
+                cmd_result = executor.execute(filter_reply["cmd_command"])
+                if cmd_result["success"]:
+                    cmd_output = cmd_result["output"]
+                    self.chat_area.append("命令执行成功")
+                else:
+                    cmd_output = cmd_result["error"]
+                    self.chat_area.append("命令执行失败")
+            else:
+                self.chat_area.append("未找到要执行的命令")
         elif filter_reply["instruction"].strip() == "无":
             # 当指令为无，意味着用户的目的是咨询信息，不需要调用任何模块
             pass
@@ -279,6 +294,11 @@ class MainWindow(QMainWindow):
             self.chat_area.append(analyze_output)
             # 将分析的结果塞进记忆管道
             self.memory_pipe.process({"role": "reply", "content": merge + " 分析结果:" + str(analyze_output)})
+        elif cmd_output:
+            self.chat_area.append("命令执行结果:")
+            self.chat_area.append(cmd_output)
+            # 将命令执行的结果塞进记忆管道
+            self.memory_pipe.process({"role": "reply", "content": merge + " 命令执行结果:" + str(cmd_output)})
         else:
             self.memory_pipe.process({"role": "reply", "content": merge})
         self.chat_area.append("")

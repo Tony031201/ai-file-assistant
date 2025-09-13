@@ -11,9 +11,17 @@ venv/
 
 # 数据与配置
 data/config.json
+data/cmd_history.json
+data/history_record.json
+data/assistant.db
 *.db
 *.sqlite
 config.json
+
+# 命令历史和运行时数据
+*_history.json
+history_record.json
+cmd_history.json
 
 # 系统文件
 .DS_Store

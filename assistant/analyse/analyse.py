@@ -26,6 +26,6 @@ def analyze(purpose:str,file_path:str) -> str:
         error(r"analyse\analyse","analyze",e)
 
 # def test():
-#     output = analyze("你帮我分析一下这个文件大概是有什么作用","C:\\Users\\atuon\\2585\\assistant\\core\\ai_parse.py")
+#     output = analyze("你帮我分析一下这个文件大概是有什么作用","path/to/your/file.py")
 #     print(output)
 # test()

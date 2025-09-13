@@ -9,6 +9,7 @@ class Response(TypedDict):
     instruction:str
     file_path: str
     file_content: str
+    cmd_command: str
     sql:str
 
 def parse_response(raw_text: str) -> dict:
@@ -46,11 +47,15 @@ def parse_response(raw_text: str) -> dict:
     m_filep = re.search(r"文件路径:\s*(.*?)(?=\n?\s*生成文件内容:)", text, flags=re.DOTALL)
     file_path = (m_filep.group(1).strip() if m_filep else None)
 
-    # 4) 生成文件内容：直到出现“可执行SQL:”为止
-    c_file = re.search(r"生成文件内容:\s*(.*?)(?=\n?\s*可执行SQL:)", text, flags=re.DOTALL)
+    # 4) 生成文件内容：直到出现"系统命令:"为止
+    c_file = re.search(r"生成文件内容:\s*(.*?)(?=\n?\s*系统命令:)", text, flags=re.DOTALL)
     file_content = (c_file.group(1).strip() if c_file else None)
 
-    # 5) SQL：优先取 ```sql 代码块
+    # 5) 系统命令：直到出现"可执行SQL:"为止
+    m_cmd = re.search(r"系统命令:\s*(.*?)(?=\n?\s*可执行SQL:)", text, flags=re.DOTALL)
+    cmd_command = (m_cmd.group(1).strip() if m_cmd else None)
+
+    # 6) SQL：优先取 ```sql 代码块
     sql = None
     m_fence = SQL_FENCE_RE.search(text)
     if m_fence:
@@ -65,15 +70,15 @@ def parse_response(raw_text: str) -> dict:
             sql_inline = m_inline.group(1).strip()
             sql = sql_inline  # 行内可能非空
 
-    # 4) 严格校验：五段都必须存在（SQL 允许为空字符串，但不能是 None）
-    if answer is None or instruction is None or file_path is None or file_content is None or sql is None:
-        raise ValueError("❌ 模型输出格式不完整：必须包含『回答:』『指令:』『路径:』『生成文件内容:』『SQL:』五段。")
+    # 7) 严格校验：六段都必须存在（SQL和cmd_command 允许为空字符串，但不能是 None）
+    if answer is None or instruction is None or file_path is None or file_content is None or cmd_command is None or sql is None:
+        raise ValueError("❌ 模型输出格式不完整：必须包含『回答:』『指令:』『文件路径:』『生成文件内容:』『系统命令:』『SQL:』六段。")
 
-    return {"answer": answer, "instruction": instruction,"file_path": file_path, "file_content":file_content, "sql": sql}
+    return {"answer": answer, "instruction": instruction,"file_path": file_path, "file_content":file_content, "cmd_command": cmd_command, "sql": sql}
 
 
 
 def merge_response(response:Response):
-    return f"回答: {response['answer']} 指令: {response['instruction']} 文件路径: {response['file_path']} 生成文件内容:{response['file_content']} 可执行SQL: {response['sql']}"
+    return f"回答: {response['answer']} 指令: {response['instruction']} 文件路径: {response['file_path']} 生成文件内容:{response['file_content']} 系统命令: {response['cmd_command']} 可执行SQL: {response['sql']}"
 
 
